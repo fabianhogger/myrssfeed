@@ -8,11 +8,12 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any, Dict, Optional
 
-__all__ = ["FeedItem", "Verdict", "Match"]
+__all__ = ["FeedItem", "Match", "Verdict"]
 
-#: Summaries are truncated before being sent to the model. Entire articles are
-#: rarely needed to judge relevance, and the cap keeps per-item token cost flat
-#: regardless of how verbose a particular feed is.
+#: Summaries are truncated before being sent to the model, and reported at the
+#: same length. Entire articles are rarely needed to judge relevance, and the cap
+#: keeps per-item token cost flat regardless of how verbose a feed is. Some feeds
+#: put the whole article in the description, which is why this matters.
 SUMMARY_CHAR_LIMIT = 1200
 
 
@@ -38,6 +39,13 @@ class FeedItem:
         return hash(self.item_id)
 
     @property
+    def short_summary(self) -> str:
+        """The summary as the model sees it: collapsed and length-capped."""
+        if not self.summary:
+            return ""
+        return textwrap.shorten(self.summary, width=SUMMARY_CHAR_LIMIT, placeholder=" ...")
+
+    @property
     def published_iso(self) -> str:
         """The publication timestamp as an ISO 8601 string, or ``""``."""
         if self.published is None:
@@ -50,7 +58,7 @@ class FeedItem:
         ``index`` is the position within the batch; the model echoes it back so
         verdicts can be matched to items without relying on ordering.
         """
-        lines = [f"<item index=\"{index}\">", f"title: {self.title}"]
+        lines = [f'<item index="{index}">', f"title: {self.title}"]
         if self.feed_title:
             lines.append(f"source: {self.feed_title}")
         if self.author:
@@ -60,10 +68,7 @@ class FeedItem:
         if self.tags:
             lines.append("categories: " + ", ".join(self.tags))
         if self.summary:
-            summary = textwrap.shorten(
-                self.summary, width=SUMMARY_CHAR_LIMIT, placeholder=" ..."
-            )
-            lines.append(f"summary: {summary}")
+            lines.append(f"summary: {self.short_summary}")
         lines.append("</item>")
         return "\n".join(lines)
 
@@ -78,7 +83,9 @@ class FeedItem:
             "author": self.author,
             "published": self.published_iso or None,
             "tags": list(self.tags),
-            "summary": self.summary,
+            # The capped summary, so the output shows what was actually judged
+            # rather than a whole article inlined by a verbose feed.
+            "summary": self.short_summary,
         }
 
 
@@ -123,5 +130,5 @@ def stable_item_id(
     for candidate in (guid, link):
         if candidate and candidate.strip():
             return candidate.strip()
-    digest = hashlib.sha256(f"{title}\x00{published}".encode("utf-8")).hexdigest()
+    digest = hashlib.sha256(f"{title}\x00{published}".encode()).hexdigest()
     return f"sha256:{digest[:32]}"

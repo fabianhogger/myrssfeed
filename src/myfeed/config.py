@@ -16,12 +16,13 @@ from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence
 from .errors import ConfigError
 
 __all__ = [
-    "Config",
-    "DEFAULT_MODEL",
     "DEFAULT_EFFORT",
+    "DEFAULT_MODEL",
     "EFFORT_LEVELS",
     "OUTPUT_FORMATS",
+    "Config",
     "parse_interval",
+    "read_config_file",
 ]
 
 #: Claude Opus 5.5 is the default: relevance judgements against a free-form
@@ -122,7 +123,8 @@ class Config:
     def __post_init__(self) -> None:
         self.system_prompt = (self.system_prompt or "").strip()
         self.feeds = _dedupe(self.feeds)
-        if isinstance(self.state_path, str):
+        if self.state_path is not None:
+            # Accept a plain string too: config files and flags both supply one.
             self.state_path = Path(self.state_path).expanduser()
         self.validate()
 
@@ -161,14 +163,14 @@ class Config:
         if self.interval is not None and self.interval <= 0:
             raise ConfigError("interval must be positive")
 
-    def replace(self, **changes: Any) -> "Config":
+    def replace(self, **changes: Any) -> Config:
         """Return a copy with ``changes`` applied, re-validated."""
         return replace(self, **changes)
 
     # -- constructors ----------------------------------------------------
 
     @classmethod
-    def from_mapping(cls, data: Mapping[str, Any]) -> "Config":
+    def from_mapping(cls, data: Mapping[str, Any]) -> Config:
         """Build a config from a plain mapping, rejecting unknown keys."""
         known = {f.name for f in cls.__dataclass_fields__.values()}
         unknown = sorted(set(data) - known)
@@ -187,27 +189,9 @@ class Config:
         return cls(**payload)
 
     @classmethod
-    def from_file(cls, path: Path) -> "Config":
-        """Load a config from a TOML or JSON file.
-
-        The format is chosen by suffix: ``.json`` is read as JSON, everything
-        else as TOML.
-        """
-        path = Path(path).expanduser()
-        try:
-            raw = path.read_bytes()
-        except OSError as exc:
-            raise ConfigError(f"cannot read config file {path}: {exc}") from exc
-        if path.suffix.lower() == ".json":
-            try:
-                data = json.loads(raw.decode("utf-8"))
-            except (UnicodeDecodeError, json.JSONDecodeError) as exc:
-                raise ConfigError(f"invalid JSON in {path}: {exc}") from exc
-        else:
-            data = _load_toml(path, raw)
-        if not isinstance(data, dict):
-            raise ConfigError(f"{path} must contain a table/object at the top level")
-        return cls.from_mapping(data)
+    def from_file(cls, path: Path) -> Config:
+        """Load and validate a config from a TOML or JSON file."""
+        return cls.from_mapping(read_config_file(path))
 
     @classmethod
     def env_overrides(cls) -> Dict[str, Any]:
@@ -229,6 +213,32 @@ class Config:
         return overrides
 
 
+def read_config_file(path: Path) -> Dict[str, Any]:
+    """Parse a TOML or JSON config file into a mapping, without validating it.
+
+    The format is chosen by suffix: ``.json`` is read as JSON, anything else as
+    TOML. Validation is left to :meth:`Config.from_mapping`, so the result can
+    serve as one layer under environment variables and command-line flags.
+    """
+    path = Path(path).expanduser()
+    try:
+        raw = path.read_bytes()
+    except OSError as exc:
+        raise ConfigError(f"cannot read config file {path}: {exc}") from exc
+    if path.suffix.lower() == ".json":
+        try:
+            data = json.loads(raw.decode("utf-8"))
+        except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+            raise ConfigError(f"invalid JSON in {path}: {exc}") from exc
+    else:
+        data = _load_toml(path, raw)
+    if not isinstance(data, dict):
+        raise ConfigError(f"{path} must contain a table/object at the top level")
+    if isinstance(data.get("interval"), str):
+        data["interval"] = parse_interval(data["interval"])
+    return data
+
+
 def _dedupe(values: Iterable[str]) -> List[str]:
     """Strip, drop blanks and de-duplicate while preserving order."""
     seen = set()
@@ -243,19 +253,28 @@ def _dedupe(values: Iterable[str]) -> List[str]:
 
 
 def _load_toml(path: Path, raw: bytes) -> Any:
+    reader: Any
     try:
+        # mypy is pinned to the lowest supported Python (3.9), where tomllib
+        # does not exist; on 3.11+ at runtime this is the fast path.
         import tomllib  # type: ignore[import-not-found]
+
+        reader = tomllib
     except ModuleNotFoundError:  # Python < 3.11
         try:
-            import tomli as tomllib  # type: ignore[no-redef]
+            import tomli
         except ModuleNotFoundError as exc:
+            # tomli is a dependency on Python < 3.11, so reaching this means
+            # the install is incomplete rather than the config being wrong.
             raise ConfigError(
-                f"reading TOML config {path} needs Python 3.11+ or the 'tomli' "
-                "package; install myfeed[toml] or use a .json config"
+                f"cannot read TOML config {path}: no TOML parser available. "
+                "Reinstall myfeed (it depends on 'tomli' below Python 3.11), "
+                "or use a .json config file instead"
             ) from exc
+        reader = tomli
     try:
-        return tomllib.loads(raw.decode("utf-8"))
-    except (UnicodeDecodeError, tomllib.TOMLDecodeError) as exc:
+        return reader.loads(raw.decode("utf-8"))
+    except (UnicodeDecodeError, reader.TOMLDecodeError) as exc:
         raise ConfigError(f"invalid TOML in {path}: {exc}") from exc
 
 
@@ -263,7 +282,7 @@ def _coerce_env(name: str, value: str, type_hint: Any) -> Any:
     """Convert an environment string to the type the field expects."""
     hint = str(type_hint)
     if name == "feeds":
-        return [part for part in _split_list(value)]
+        return list(_split_list(value))
     if name == "interval":
         return parse_interval(value)
     if "bool" in hint:

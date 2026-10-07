@@ -1,0 +1,42 @@
+# Example myfeed configuration.
+#
+#   myfeed --config examples/myfeed.toml --dry-run
+#
+# Every key here can also be set as MYFEED_<KEY> in the environment or as a
+# command-line flag; flags win over the environment, which wins over this file.
+
+# The filter itself. Be specific about what to skip as well as what to keep:
+# the model is told to prefer precision, so vague criteria drop borderline items.
+system_prompt = """
+Keep items about:
+  - security advisories or CVEs affecting Python, Node or Go packages
+  - outages and degradations at AWS, Google Cloud, Azure or Cloudflare
+  - post-incident write-ups with actual root-cause detail
+
+Skip:
+  - funding rounds, acquisitions and hiring news
+  - vendor marketing, benchmarks and "best practices" listicles
+  - conference and webinar announcements
+"""
+
+feeds = [
+  "https://feeds.feedburner.com/TheHackersNews",
+  "https://status.cloud.google.com/en/feed.atom",
+  "https://www.cloudflarestatus.com/history.atom",
+]
+
+# Remember what has already been reported, so each run only shows new items.
+state_path = "~/.local/state/myfeed/state.json"
+state_ttl_days = 30
+
+# Keep running, one pass every 30 minutes. Remove this (or pass --once) to run
+# a single pass and exit, which is what you want under cron.
+interval = "30m"
+
+output_format = "text"
+
+# Cost controls: relevance is a classification task, so low effort is plenty,
+# and ten items per request spreads the cached system prompt across the batch.
+effort = "low"
+batch_size = 10
+max_items_per_feed = 50

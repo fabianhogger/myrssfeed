@@ -1,0 +1,14 @@
+# Schedule for myfeed.service. See examples/myfeed.service for installation.
+
+[Unit]
+Description=Run myfeed every 30 minutes
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=30min
+# Spread the run out a little so every machine does not hit the feeds at once.
+RandomizedDelaySec=2min
+Persistent=true
+
+[Install]
+WantedBy=timers.target

@@ -16,7 +16,7 @@ from .config import DEFAULT_EFFORT, DEFAULT_MODEL
 from .errors import ClassificationError
 from .models import FeedItem, Match, Verdict
 
-__all__ = ["RelevanceFilter", "FilterResult"]
+__all__ = ["FilterResult", "RelevanceFilter"]
 
 _LOG = logging.getLogger(__name__)
 
@@ -89,15 +89,13 @@ class RelevanceFilter:
         self._include_reasons = include_reasons
         self._refusal_fallback = refusal_fallback
         self._client = client
-        self._client_options = {
-            "api_key": api_key,
-            "timeout": timeout,
-            "max_retries": max_retries,
-        }
+        self._api_key = api_key
+        self._timeout = timeout
+        self._max_retries = max_retries
 
     # -- public API -------------------------------------------------------
 
-    def select(self, items: Sequence[FeedItem]) -> "FilterResult":
+    def select(self, items: Sequence[FeedItem]) -> FilterResult:
         """Classify ``items`` and report the matches, in the order given.
 
         A batch that fails to classify is logged and skipped. Its items are left
@@ -159,8 +157,13 @@ class RelevanceFilter:
                     "the 'anthropic' package is required; install myfeed's "
                     "dependencies with `pip install myfeed`"
                 ) from exc
-            options = {k: v for k, v in self._client_options.items() if v is not None}
-            self._client = anthropic.Anthropic(**options)
+            # api_key=None is the documented way to let the SDK resolve
+            # credentials from the environment.
+            self._client = anthropic.Anthropic(
+                api_key=self._api_key,
+                timeout=self._timeout,
+                max_retries=self._max_retries,
+            )
         return self._client
 
     def _render_batch(self, batch: Sequence[FeedItem]) -> str:

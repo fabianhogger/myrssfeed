@@ -86,44 +86,42 @@ class FeedReader:
             modified=cursor.modified,
             agent=self._user_agent,
         )
-        status = getattr(parsed, "status", None)
+        status = _field(parsed, "status")
         if status == _NOT_MODIFIED:
             _LOG.debug("%s unchanged (304)", feed_url)
             return []
         if isinstance(status, int) and status >= 400:
             raise FeedError(feed_url, f"HTTP {status}")
 
-        entries = getattr(parsed, "entries", None) or []
+        entries = _field(parsed, "entries") or []
         if not entries:
             # A bozo flag with no entries means the body was not a feed at all;
             # a bozo flag *with* entries is usually a recoverable quirk.
-            exception = getattr(parsed, "bozo_exception", None)
+            exception = _field(parsed, "bozo_exception")
             if exception is not None:
                 raise FeedError(feed_url, f"could not parse feed: {exception}")
             _LOG.debug("%s has no entries", feed_url)
             return []
-        if getattr(parsed, "bozo", 0):
+        if _field(parsed, "bozo"):
             _LOG.debug(
-                "%s parsed with warnings: %s", feed_url, getattr(parsed, "bozo_exception", "")
+                "%s parsed with warnings: %s", feed_url, _field(parsed, "bozo_exception", "")
             )
 
         self._state.set_cursor(
             feed_url,
             FeedCursor(
-                etag=getattr(parsed, "etag", None),
-                modified=getattr(parsed, "modified", None),
+                etag=_field(parsed, "etag"),
+                modified=_field(parsed, "modified"),
             ),
         )
 
-        feed_title = _text(getattr(parsed, "feed", {}), "title")
+        feed_title = _text(_field(parsed, "feed", {}), "title")
         items = [_to_item(entry, feed_url, feed_title) for entry in entries]
         items = _newest_first(items)
         fresh = [item for item in items if not self._state.is_seen(item.item_id)]
         if self._max_items:
             fresh = fresh[: self._max_items]
-        _LOG.info(
-            "%s: %d entries, %d new", feed_url, len(items), len(fresh)
-        )
+        _LOG.info("%s: %d entries, %d new", feed_url, len(items), len(fresh))
         return fresh
 
 
@@ -134,10 +132,23 @@ def parse_feed(
     import feedparser
 
     parsed = feedparser.parse(content)
-    entries = getattr(parsed, "entries", None) or []
-    feed_title = _text(getattr(parsed, "feed", {}), "title")
+    entries = _field(parsed, "entries") or []
+    feed_title = _text(_field(parsed, "feed", {}), "title")
     items = _newest_first([_to_item(entry, feed_url, feed_title) for entry in entries])
     return items[:max_items] if max_items else items
+
+
+def _field(source: Any, key: str, default: Any = None) -> Any:
+    """Read ``key`` from a parse result.
+
+    ``feedparser`` returns a dict subclass that also allows attribute access;
+    both are accepted here so the reader works with plain mappings too.
+    """
+    if hasattr(source, "get"):
+        value = source.get(key, default)
+        if value is not None:
+            return value
+    return getattr(source, key, default)
 
 
 def _newest_first(items: Iterable[FeedItem]) -> List[FeedItem]:
@@ -217,7 +228,8 @@ def _timestamp(entry: Any) -> Optional[datetime]:
             continue
         try:
             # feedparser normalises these struct_time values to UTC.
-            return datetime(*value[:6], tzinfo=timezone.utc)
+            year, month, day, hour, minute, second = value[:6]
+            return datetime(year, month, day, hour, minute, second, tzinfo=timezone.utc)
         except (TypeError, ValueError):  # pragma: no cover - malformed date
             continue
     return None

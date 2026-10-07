@@ -7,10 +7,10 @@ so callers embedding the library can catch a single base class.
 from __future__ import annotations
 
 __all__ = [
-    "MyFeedError",
+    "ClassificationError",
     "ConfigError",
     "FeedError",
-    "ClassificationError",
+    "MyFeedError",
     "StateError",
 ]
 

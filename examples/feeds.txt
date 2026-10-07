@@ -1,0 +1,6 @@
+# One feed URL per line; '#' starts a comment.
+#   myfeed --prompt "..." --feeds-file examples/feeds.txt
+
+https://blog.rust-lang.org/feed.xml
+https://blog.djangoproject.com/rss/
+https://www.theregister.com/headlines.atom   # comments may follow a URL

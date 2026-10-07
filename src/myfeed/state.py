@@ -8,6 +8,7 @@ stores HTTP validators so unchanged feeds cost a single conditional request.
 
 from __future__ import annotations
 
+import contextlib
 import json
 import logging
 import os
@@ -39,7 +40,7 @@ class FeedCursor:
         return {"etag": self.etag, "modified": self.modified}
 
     @classmethod
-    def from_dict(cls, data: Any) -> "FeedCursor":
+    def from_dict(cls, data: Any) -> FeedCursor:
         if not isinstance(data, dict):
             return cls()
         etag = data.get("etag")
@@ -66,7 +67,7 @@ class State:
     # -- loading and saving ----------------------------------------------
 
     @classmethod
-    def load(cls, path: Optional[Path], ttl_days: int = 30) -> "State":
+    def load(cls, path: Optional[Path], ttl_days: int = 30) -> State:
         """Read state from ``path``, returning empty state if it is absent.
 
         A corrupt or future-versioned file is reported and then ignored: losing
@@ -116,7 +117,7 @@ class State:
             self.path.parent.mkdir(parents=True, exist_ok=True)
             # Write to a sibling temp file and rename, so an interrupted run
             # cannot leave a half-written state file behind.
-            handle = tempfile.NamedTemporaryFile(
+            handle = tempfile.NamedTemporaryFile(  # noqa: SIM115 - closed below
                 mode="w",
                 encoding="utf-8",
                 dir=str(self.path.parent),
@@ -170,7 +171,5 @@ class State:
 
 
 def _unlink_quietly(path: str) -> None:
-    try:
+    with contextlib.suppress(OSError):  # best-effort cleanup
         os.unlink(path)
-    except OSError:  # pragma: no cover - best-effort cleanup
-        pass
