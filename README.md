@@ -30,14 +30,25 @@ security commentary."*
 
 ## Install
 
+myfeed is not on PyPI yet, so install it from a checkout:
+
 ```bash
-pip install myfeed
+git clone https://github.com/your-org/myfeed
+cd myfeed
+pip install .
 ```
 
-From a checkout:
+For development, install it editable with the test and lint tools:
 
 ```bash
 pip install -e ".[dev]"
+```
+
+Once the project is published (see [Releasing](#releasing)), the usual one-liner
+will work:
+
+```bash
+pip install myfeed     # not available until the first release is published
 ```
 
 Requires Python 3.9+ and an Anthropic API key:
@@ -45,6 +56,15 @@ Requires Python 3.9+ and an Anthropic API key:
 ```bash
 export ANTHROPIC_API_KEY=sk-ant-...
 ```
+
+Check that it landed:
+
+```bash
+myfeed --version
+```
+
+If the `myfeed` command is not found, your Python scripts directory is not on
+`PATH`; `python -m myfeed` works identically.
 
 ## Usage
 
@@ -232,6 +252,38 @@ pip install -e ".[dev]"
 pytest                 # no network or API calls
 ruff check . && ruff format --check .
 mypy
+```
+
+The test suite never reaches the network or the Anthropic API: feeds are parsed
+from in-memory XML and the classifier is a scripted fake, so it runs offline and
+without an API key.
+
+## Releasing
+
+Publishing is automated: pushing a `v*` tag builds the distributions and uploads
+them to PyPI via [trusted publishing](https://docs.pypi.org/trusted-publishers/),
+so no API token is stored in the repository.
+
+One-time setup on PyPI: create a pending publisher for the project name, pointing
+at this repository, workflow `release.yml`, environment `pypi`.
+
+Then, per release:
+
+```bash
+# 1. bump __version__ in src/myfeed/__init__.py and move the CHANGELOG entry
+#    out of [Unreleased] into a new version heading
+# 2. commit, tag and push
+git commit -am "Release 0.1.0"
+git tag -a v0.1.0 -m "0.1.0"
+git push origin main v0.1.0
+```
+
+To check the build locally first:
+
+```bash
+pip install build twine
+python -m build
+twine check --strict dist/*
 ```
 
 ## License
