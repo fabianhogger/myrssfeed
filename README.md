@@ -30,25 +30,16 @@ security commentary."*
 
 ## Install
 
-myrssfeed is not on PyPI yet, so install it from a checkout:
+```bash
+pip install myrssfeed
+```
+
+From a checkout, for development:
 
 ```bash
 git clone https://github.com/fabianhogger/myrssfeed
 cd myrssfeed
-pip install .
-```
-
-For development, install it editable with the test and lint tools:
-
-```bash
 pip install -e ".[dev]"
-```
-
-Once the project is published (see [Releasing](#releasing)), the usual one-liner
-will work:
-
-```bash
-pip install myrssfeed     # not available until the first release is published
 ```
 
 Requires Python 3.9+ and an Anthropic API key:
