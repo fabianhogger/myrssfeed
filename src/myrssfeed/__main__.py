@@ -1,4 +1,4 @@
-"""Allow ``python -m myfeed`` as an alternative to the ``myfeed`` script."""
+"""Allow ``python -m myrssfeed`` as an alternative to the ``myrssfeed`` script."""
 
 from __future__ import annotations
 

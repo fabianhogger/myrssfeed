@@ -1,7 +1,7 @@
-# Schedule for myfeed.service. See examples/myfeed.service for installation.
+# Schedule for myrssfeed.service. See examples/myrssfeed.service for installation.
 
 [Unit]
-Description=Run myfeed every 30 minutes
+Description=Run myrssfeed every 30 minutes
 
 [Timer]
 OnBootSec=2min

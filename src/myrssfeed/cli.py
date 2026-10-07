@@ -20,7 +20,7 @@ from .config import (
     parse_interval,
     read_config_file,
 )
-from .errors import ConfigError, MyFeedError
+from .errors import ConfigError, MyRssFeedError
 from .feeds import FeedReader
 from .models import Match, Verdict
 from .output import render
@@ -29,7 +29,7 @@ from .state import State
 
 __all__ = ["build_parser", "main"]
 
-_LOG = logging.getLogger("myfeed")
+_LOG = logging.getLogger("myrssfeed")
 
 #: Exit statuses, so callers (and cron) can tell the cases apart.
 EXIT_OK = 0
@@ -40,14 +40,14 @@ EXIT_PARTIAL = 3
 _EPILOG = """\
 examples:
   # one-off run
-  myfeed --prompt "AI policy and chip export controls" \\
+  myrssfeed --prompt "AI policy and chip export controls" \\
          --feed https://example.com/feed.xml
 
   # read everything from a config file and run every 30 minutes
-  myfeed --config myfeed.toml --interval 30m
+  myrssfeed --config myrssfeed.toml --interval 30m
 
   # see what would be judged, without calling the API
-  myfeed --config myfeed.toml --dry-run
+  myrssfeed --config myrssfeed.toml --dry-run
 
 exit status:
   0  ran successfully
@@ -62,7 +62,7 @@ The API key is read from ANTHROPIC_API_KEY unless --api-key is given.
 def build_parser() -> argparse.ArgumentParser:
     """Construct the argument parser."""
     parser = argparse.ArgumentParser(
-        prog="myfeed",
+        prog="myrssfeed",
         description=(
             "Read RSS feeds and print only the items that match your criteria, "
             "as judged by Claude."
@@ -70,7 +70,7 @@ def build_parser() -> argparse.ArgumentParser:
         epilog=_EPILOG,
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    parser.add_argument("--version", action="version", version=f"myfeed {__version__}")
+    parser.add_argument("--version", action="version", version=f"myrssfeed {__version__}")
     parser.add_argument(
         "-c",
         "--config",
@@ -226,7 +226,7 @@ def main(argv: Optional[Sequence[str]] = None, stream: Optional[TextIO] = None) 
     except KeyboardInterrupt:
         _LOG.info("interrupted")
         return EXIT_OK
-    except MyFeedError as exc:
+    except MyRssFeedError as exc:
         _LOG.error("%s", exc)
         return EXIT_ERROR
 
@@ -244,12 +244,12 @@ def _build_config(args: argparse.Namespace) -> Config:
 
     if "system_prompt" not in data or not str(data.get("system_prompt", "")).strip():
         raise ConfigError(
-            "no system prompt: pass --prompt/--prompt-file, set MYFEED_SYSTEM_PROMPT, "
+            "no system prompt: pass --prompt/--prompt-file, set MYRSSFEED_SYSTEM_PROMPT, "
             "or put 'system_prompt' in a config file"
         )
     if not data.get("feeds"):
         raise ConfigError(
-            "no feeds: pass --feed/--feeds-file, set MYFEED_FEEDS, or put 'feeds' "
+            "no feeds: pass --feed/--feeds-file, set MYRSSFEED_FEEDS, or put 'feeds' "
             "in a config file"
         )
     return Config.from_mapping(data)

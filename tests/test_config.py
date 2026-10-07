@@ -6,8 +6,8 @@ import json
 
 import pytest
 
-from myfeed.config import Config, parse_interval, read_config_file
-from myfeed.errors import ConfigError
+from myrssfeed.config import Config, parse_interval, read_config_file
+from myrssfeed.errors import ConfigError
 
 FEEDS = ["https://example.com/feed.xml"]
 
@@ -109,7 +109,7 @@ class TestFromMapping:
 
 class TestFiles:
     def test_json_config_round_trip(self, tmp_path):
-        path = tmp_path / "myfeed.json"
+        path = tmp_path / "myrssfeed.json"
         path.write_text(
             json.dumps({"system_prompt": "security advisories", "feeds": FEEDS}),
             encoding="utf-8",
@@ -119,7 +119,7 @@ class TestFiles:
 
     def test_toml_config_round_trip(self, tmp_path):
         _require_toml()
-        path = tmp_path / "myfeed.toml"
+        path = tmp_path / "myrssfeed.toml"
         path.write_text(
             'system_prompt = "security advisories"\n'
             'feeds = ["https://example.com/feed.xml"]\n'
@@ -149,11 +149,11 @@ class TestFiles:
 class TestEnvOverrides:
     def test_values_are_coerced_by_field_type(self, monkeypatch):
         monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-test")
-        monkeypatch.setenv("MYFEED_FEEDS", "https://a.example/f, https://b.example/f")
-        monkeypatch.setenv("MYFEED_BATCH_SIZE", "4")
-        monkeypatch.setenv("MYFEED_TIMEOUT", "30.5")
-        monkeypatch.setenv("MYFEED_INCLUDE_REASONS", "no")
-        monkeypatch.setenv("MYFEED_INTERVAL", "10m")
+        monkeypatch.setenv("MYRSSFEED_FEEDS", "https://a.example/f, https://b.example/f")
+        monkeypatch.setenv("MYRSSFEED_BATCH_SIZE", "4")
+        monkeypatch.setenv("MYRSSFEED_TIMEOUT", "30.5")
+        monkeypatch.setenv("MYRSSFEED_INCLUDE_REASONS", "no")
+        monkeypatch.setenv("MYRSSFEED_INTERVAL", "10m")
         overrides = Config.env_overrides()
         assert overrides["api_key"] == "sk-test"
         assert overrides["feeds"] == ["https://a.example/f", "https://b.example/f"]
@@ -163,15 +163,15 @@ class TestEnvOverrides:
         assert overrides["interval"] == 600
 
     def test_empty_values_are_ignored(self, monkeypatch):
-        monkeypatch.setenv("MYFEED_MODEL", "")
+        monkeypatch.setenv("MYRSSFEED_MODEL", "")
         assert "model" not in Config.env_overrides()
 
     def test_bad_boolean_is_reported(self, monkeypatch):
-        monkeypatch.setenv("MYFEED_INCLUDE_REASONS", "perhaps")
+        monkeypatch.setenv("MYRSSFEED_INCLUDE_REASONS", "perhaps")
         with pytest.raises(ConfigError, match="expected a boolean"):
             Config.env_overrides()
 
     def test_bad_number_is_reported(self, monkeypatch):
-        monkeypatch.setenv("MYFEED_BATCH_SIZE", "many")
+        monkeypatch.setenv("MYRSSFEED_BATCH_SIZE", "many")
         with pytest.raises(ConfigError, match="expected a number"):
             Config.env_overrides()

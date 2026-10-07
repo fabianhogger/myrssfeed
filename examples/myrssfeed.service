@@ -1,0 +1,22 @@
+# Run one myrssfeed pass, triggered by myrssfeed.timer.
+#
+#   mkdir -p ~/.config/systemd/user
+#   cp examples/myrssfeed.{service,timer} ~/.config/systemd/user/
+#   systemctl --user enable --now myrssfeed.timer
+#   journalctl --user -u myrssfeed -f
+#
+# Put the API key in ~/.config/myrssfeed/env as:
+#   ANTHROPIC_API_KEY=sk-ant-...
+# and keep that file mode 600.
+
+[Unit]
+Description=Filter RSS feeds with myrssfeed
+Documentation=https://github.com/fabianhogger/myrssfeed
+After=network-online.target
+
+[Service]
+Type=oneshot
+EnvironmentFile=%h/.config/myrssfeed/env
+ExecStart=%h/.local/bin/myrssfeed --config %h/.config/myrssfeed/myrssfeed.toml --once --verbose
+# --once makes this a single pass; the timer below provides the schedule.
+Nice=10

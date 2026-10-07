@@ -1,11 +1,11 @@
-"""myfeed - read RSS feeds and keep only the news that matches your criteria.
+"""myrssfeed - read RSS feeds and keep only the news that matches your criteria.
 
 The criteria are a plain-English system prompt; Claude decides, per item,
 whether it fits. Matching items are printed with their links.
 
 Typical library use::
 
-    from myfeed import Config, Runner
+    from myrssfeed import Config, Runner
 
     config = Config(
         system_prompt="Open-source release notes for Python web frameworks.",
@@ -25,7 +25,7 @@ from .errors import (
     ClassificationError,
     ConfigError,
     FeedError,
-    MyFeedError,
+    MyRssFeedError,
     StateError,
 )
 from .feeds import FeedReader
@@ -44,7 +44,7 @@ __all__ = [
     "FeedReader",
     "FilterResult",
     "Match",
-    "MyFeedError",
+    "MyRssFeedError",
     "RelevanceFilter",
     "RunResult",
     "Runner",

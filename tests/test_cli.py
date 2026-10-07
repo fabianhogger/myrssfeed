@@ -8,9 +8,9 @@ import json
 import pytest
 
 from conftest import FakeFilter, FakeReader
-from myfeed import cli
-from myfeed.errors import FeedError
-from myfeed.state import State
+from myrssfeed import cli
+from myrssfeed.errors import FeedError
+from myrssfeed.state import State
 
 PROMPT = ["--prompt", "AI policy news"]
 FEED = ["--feed", "https://example.com/feed.xml"]
@@ -19,7 +19,7 @@ FEED = ["--feed", "https://example.com/feed.xml"]
 @pytest.fixture(autouse=True)
 def isolate_env(monkeypatch):
     """Keep the developer's own environment out of the CLI tests."""
-    for name in ("ANTHROPIC_API_KEY", "MYFEED_MODEL", "MYFEED_FEEDS"):
+    for name in ("ANTHROPIC_API_KEY", "MYRSSFEED_MODEL", "MYRSSFEED_FEEDS"):
         monkeypatch.delenv(name, raising=False)
     monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-test")
 
@@ -72,7 +72,7 @@ class TestBasicRuns:
         with pytest.raises(SystemExit) as excinfo:
             cli.main(["--version"])
         assert excinfo.value.code == 0
-        assert "myfeed" in capsys.readouterr().out
+        assert "myrssfeed" in capsys.readouterr().out
 
 
 class TestConfigLayering:
@@ -103,7 +103,7 @@ class TestConfigLayering:
             ),
             encoding="utf-8",
         )
-        monkeypatch.setenv("MYFEED_EFFORT", "high")
+        monkeypatch.setenv("MYRSSFEED_EFFORT", "high")
         run(["--config", str(path)])
         assert fake_runner["config"].effort == "high"
 

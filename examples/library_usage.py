@@ -1,11 +1,11 @@
-"""Using myfeed as a library instead of through the CLI.
+"""Using myrssfeed as a library instead of through the CLI.
 
 ANTHROPIC_API_KEY=sk-ant-... python examples/library_usage.py
 """
 
 from __future__ import annotations
 
-from myfeed import Config, Runner
+from myrssfeed import Config, Runner
 
 config = Config(
     system_prompt=(
@@ -17,7 +17,7 @@ config = Config(
         "https://flask.palletsprojects.com/en/stable/changes.atom",
     ],
     # Without a state path, every run reconsiders every item in the feed.
-    state_path="~/.local/state/myfeed/example-state.json",
+    state_path="~/.local/state/myrssfeed/example-state.json",
     effort="low",
 )
 

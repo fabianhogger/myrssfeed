@@ -1,11 +1,11 @@
-# myfeed
+# myrssfeed
 
 Read RSS/Atom feeds, and print only the items that match criteria you describe
 in plain English. Claude makes the call on each item; you get the headline, the
 link, and a one-line reason.
 
 ```console
-$ myfeed --prompt "Export controls on AI chips, and EU tech regulation" \
+$ myrssfeed --prompt "Export controls on AI chips, and EU tech regulation" \
          --feed https://feeds.arstechnica.com/arstechnica/technology-lab \
          --feed https://www.theregister.com/headlines.atom
 US tightens accelerator export rules for third-country resellers
@@ -30,11 +30,11 @@ security commentary."*
 
 ## Install
 
-myfeed is not on PyPI yet, so install it from a checkout:
+myrssfeed is not on PyPI yet, so install it from a checkout:
 
 ```bash
-git clone https://github.com/fabianhogger/myfeed
-cd myfeed
+git clone https://github.com/fabianhogger/myrssfeed
+cd myrssfeed
 pip install .
 ```
 
@@ -48,7 +48,7 @@ Once the project is published (see [Releasing](#releasing)), the usual one-liner
 will work:
 
 ```bash
-pip install myfeed     # not available until the first release is published
+pip install myrssfeed     # not available until the first release is published
 ```
 
 Requires Python 3.9+ and an Anthropic API key:
@@ -60,23 +60,23 @@ export ANTHROPIC_API_KEY=sk-ant-...
 Check that it landed:
 
 ```bash
-myfeed --version
+myrssfeed --version
 ```
 
-If the `myfeed` command is not found, your Python scripts directory is not on
-`PATH`; `python -m myfeed` works identically.
+If the `myrssfeed` command is not found, your Python scripts directory is not on
+`PATH`; `python -m myrssfeed` works identically.
 
 ## Usage
 
 ### One-off run
 
 ```bash
-myfeed --prompt "Rust async ecosystem news" --feed https://blog.rust-lang.org/feed.xml
+myrssfeed --prompt "Rust async ecosystem news" --feed https://blog.rust-lang.org/feed.xml
 ```
 
 ### With a config file
 
-`myfeed.toml`:
+`myrssfeed.toml`:
 
 ```toml
 system_prompt = """
@@ -93,12 +93,12 @@ feeds = [
 ]
 
 interval = "30m"
-state_path = "~/.local/state/myfeed/state.json"
+state_path = "~/.local/state/myrssfeed/state.json"
 output_format = "markdown"
 ```
 
 ```bash
-myfeed --config myfeed.toml
+myrssfeed --config myrssfeed.toml
 ```
 
 JSON config files work the same way; the format is chosen by file extension.
@@ -111,14 +111,14 @@ Two options, depending on whether you want a resident process.
 `Ctrl-C`/`SIGTERM` so the state file is never left half-written:
 
 ```bash
-myfeed --config myfeed.toml --interval 45m
+myrssfeed --config myrssfeed.toml --interval 45m
 ```
 
-**cron or systemd** — have myfeed run one pass and exit. The state file means
+**cron or systemd** — have myrssfeed run one pass and exit. The state file means
 each run only reports items it has not reported before:
 
 ```cron
-*/30 * * * * ANTHROPIC_API_KEY=sk-ant-... /usr/local/bin/myfeed --config ~/myfeed.toml --once >> ~/myfeed.log 2>&1
+*/30 * * * * ANTHROPIC_API_KEY=sk-ant-... /usr/local/bin/myrssfeed --config ~/myrssfeed.toml --once >> ~/myrssfeed.log 2>&1
 ```
 
 A systemd timer unit is in [`examples/`](examples/).
@@ -129,7 +129,7 @@ A systemd timer unit is in [`examples/`](examples/).
 the API, and without marking anything as seen:
 
 ```bash
-myfeed --config myfeed.toml --dry-run -v
+myrssfeed --config myrssfeed.toml --dry-run -v
 ```
 
 ### Output formats
@@ -140,7 +140,7 @@ myfeed --config myfeed.toml --dry-run -v
 | `markdown`  | Pasting into notes, or posting to chat            |
 | `json`      | Piping into `jq` or another program               |
 
-Logs go to stderr and results to stdout, so `myfeed ... | jq` works as expected.
+Logs go to stderr and results to stdout, so `myrssfeed ... | jq` works as expected.
 
 ## How it works
 
@@ -170,7 +170,7 @@ The knobs that matter:
 ## Configuration reference
 
 Every key below can be set in a config file, as an environment variable
-`MYFEED_<KEY>` (uppercase), or as a command-line flag. Precedence is
+`MYRSSFEED_<KEY>` (uppercase), or as a command-line flag. Precedence is
 file < environment < flags.
 
 | Key                  | Default            | Meaning                                                |
@@ -191,7 +191,7 @@ file < environment < flags.
 | `max_tokens`         | `16000`            | Output ceiling per request                             |
 | `refusal_fallback`   | `true`             | Route a declined request to a fallback model           |
 | `include_reasons`    | `true`             | Ask for and show a reason per item                     |
-| `user_agent`         | `myfeed (...)`     | `User-Agent` used when fetching feeds                  |
+| `user_agent`         | `myrssfeed (...)`     | `User-Agent` used when fetching feeds                  |
 
 `--api-key` also exists, but prefer the environment variable: flags are visible
 in `ps` output and end up in shell history.
@@ -210,12 +210,12 @@ in `ps` output and end up in shell history.
 The CLI is a thin wrapper; the same thing works from Python:
 
 ```python
-from myfeed import Config, Runner
+from myrssfeed import Config, Runner
 
 config = Config(
     system_prompt="Release notes for Python web frameworks.",
     feeds=["https://blog.djangoproject.com/rss/"],
-    state_path="~/.local/state/myfeed/state.json",
+    state_path="~/.local/state/myrssfeed/state.json",
 )
 
 result = Runner(config).run_once()
@@ -267,9 +267,9 @@ at <https://pypi.org/manage/account/publishing/> and the same page on
 
 | Field       | Value          |
 | ----------- | -------------- |
-| Project     | `myfeed`       |
+| Project     | `myrssfeed`       |
 | Owner       | `fabianhogger` |
-| Repository  | `myfeed`       |
+| Repository  | `myrssfeed`       |
 | Workflow    | `release.yml`  |
 | Environment | `pypi` on PyPI, `testpypi` on TestPyPI |
 
@@ -279,9 +279,9 @@ Then, per release:
 # 1. Rehearse on TestPyPI, and check the result installs
 gh workflow run release.yml
 pip install --index-url https://test.pypi.org/simple/ \
-            --extra-index-url https://pypi.org/simple/ myfeed
+            --extra-index-url https://pypi.org/simple/ myrssfeed
 
-# 2. Bump __version__ in src/myfeed/__init__.py, move the CHANGELOG entry out
+# 2. Bump __version__ in src/myrssfeed/__init__.py, move the CHANGELOG entry out
 #    of [Unreleased] into a version heading, then tag and push
 git commit -am "Release 0.1.0"
 git tag -a v0.1.0 -m "0.1.0"

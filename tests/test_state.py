@@ -7,8 +7,8 @@ import time
 
 import pytest
 
-from myfeed.errors import StateError
-from myfeed.state import STATE_VERSION, FeedCursor, State
+from myrssfeed.errors import StateError
+from myrssfeed.state import STATE_VERSION, FeedCursor, State
 
 
 def test_in_memory_state_never_writes():

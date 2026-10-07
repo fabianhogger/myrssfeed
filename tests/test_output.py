@@ -6,8 +6,8 @@ import json
 
 import pytest
 
-from myfeed.models import FeedItem, Match, Verdict
-from myfeed.output import render
+from myrssfeed.models import FeedItem, Match, Verdict
+from myrssfeed.output import render
 
 
 @pytest.fixture

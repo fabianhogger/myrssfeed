@@ -35,7 +35,7 @@ jobs:
 
       - name: Test
         # The suite never touches the network; an absent key must not change that.
-        run: pytest --cov=myfeed --cov-report=term-missing
+        run: pytest --cov=myrssfeed --cov-report=term-missing
 
   lint:
     name: lint and types

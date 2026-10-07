@@ -6,9 +6,9 @@ from datetime import timezone
 
 import pytest
 
-from myfeed.errors import FeedError
-from myfeed.feeds import FeedReader, parse_feed
-from myfeed.state import FeedCursor, State
+from myrssfeed.errors import FeedError
+from myrssfeed.feeds import FeedReader, parse_feed
+from myrssfeed.state import FeedCursor, State
 
 pytest.importorskip("feedparser")
 
@@ -127,8 +127,10 @@ class TestFeedReader:
         parsed["status"] = 200
         calls = []
         self._stub(monkeypatch, parsed, calls)
-        FeedReader(State(), user_agent="myfeed/test").read_one("https://example.com/feed.xml")
-        assert calls[0][1]["agent"] == "myfeed/test"
+        FeedReader(State(), user_agent="myrssfeed/test").read_one(
+            "https://example.com/feed.xml"
+        )
+        assert calls[0][1]["agent"] == "myrssfeed/test"
 
     def test_read_collects_errors_without_aborting(self, monkeypatch, rss_xml):
         import feedparser

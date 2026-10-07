@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 
-from myfeed.models import SUMMARY_CHAR_LIMIT, FeedItem, Match, Verdict, stable_item_id
+from myrssfeed.models import SUMMARY_CHAR_LIMIT, FeedItem, Match, Verdict, stable_item_id
 
 
 def test_prompt_block_contains_the_fields_the_model_needs(items):

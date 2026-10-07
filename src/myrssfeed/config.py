@@ -36,7 +36,7 @@ DEFAULT_EFFORT = "low"
 EFFORT_LEVELS = ("low", "medium", "high", "xhigh", "max")
 OUTPUT_FORMATS = ("text", "markdown", "json")
 
-_ENV_PREFIX = "MYFEED_"
+_ENV_PREFIX = "MYRSSFEED_"
 _API_KEY_ENV = "ANTHROPIC_API_KEY"
 
 _INTERVAL_UNITS = {"s": 1, "m": 60, "h": 3600, "d": 86400}
@@ -118,7 +118,7 @@ class Config:
     max_tokens: int = 16000
     refusal_fallback: bool = True
     include_reasons: bool = True
-    user_agent: str = "myfeed (+https://github.com/)"
+    user_agent: str = "myrssfeed (+https://github.com/fabianhogger/myrssfeed)"
 
     def __post_init__(self) -> None:
         self.system_prompt = (self.system_prompt or "").strip()
@@ -197,9 +197,9 @@ class Config:
     def env_overrides(cls) -> Dict[str, Any]:
         """Collect configuration from the environment.
 
-        Recognised variables are ``ANTHROPIC_API_KEY`` plus ``MYFEED_*`` named
-        after the dataclass fields (for example ``MYFEED_MODEL``,
-        ``MYFEED_BATCH_SIZE``, ``MYFEED_FEEDS`` as a comma-separated list).
+        Recognised variables are ``ANTHROPIC_API_KEY`` plus ``MYRSSFEED_*`` named
+        after the dataclass fields (for example ``MYRSSFEED_MODEL``,
+        ``MYRSSFEED_BATCH_SIZE``, ``MYRSSFEED_FEEDS`` as a comma-separated list).
         """
         overrides: Dict[str, Any] = {}
         api_key = os.environ.get(_API_KEY_ENV)
@@ -268,7 +268,7 @@ def _load_toml(path: Path, raw: bytes) -> Any:
             # the install is incomplete rather than the config being wrong.
             raise ConfigError(
                 f"cannot read TOML config {path}: no TOML parser available. "
-                "Reinstall myfeed (it depends on 'tomli' below Python 3.11), "
+                "Reinstall myrssfeed (it depends on 'tomli' below Python 3.11), "
                 "or use a .json config file instead"
             ) from exc
         reader = tomli

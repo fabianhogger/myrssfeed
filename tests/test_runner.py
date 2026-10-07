@@ -7,10 +7,10 @@ import io
 import pytest
 
 from conftest import FakeFilter, FakeReader
-from myfeed.config import Config
-from myfeed.errors import FeedError
-from myfeed.runner import Runner
-from myfeed.state import State
+from myrssfeed.config import Config
+from myrssfeed.errors import FeedError
+from myrssfeed.runner import Runner
+from myrssfeed.state import State
 
 
 def make_runner(items, *, relevant=("a",), fail_ids=(), errors=(), state=None, **config_kwargs):
@@ -137,7 +137,7 @@ class TestSchedule:
 
         runner.run_once = run_and_request_stop
 
-        import myfeed.runner as runner_module
+        import myrssfeed.runner as runner_module
 
         real_scope_enter = runner_module._SignalScope.__enter__
 

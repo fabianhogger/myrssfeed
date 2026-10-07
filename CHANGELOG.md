@@ -14,8 +14,8 @@ Initial release.
 
 - Filter RSS/Atom feeds against a plain-English system prompt, judged by Claude,
   printing matching items with their links and a one-line reason.
-- `myfeed` command line interface with layered configuration: TOML/JSON config
-  file, `MYFEED_*` environment variables, then flags.
+- `myrssfeed` command line interface with layered configuration: TOML/JSON config
+  file, `MYRSSFEED_*` environment variables, then flags.
 - Scheduling: a built-in `--interval` loop with clean `SIGINT`/`SIGTERM`
   shutdown, or single `--once` passes for cron and systemd timers.
 - State file recording handled items, so repeated runs only report new ones;
@@ -25,5 +25,5 @@ Initial release.
 - `--dry-run` to inspect what would be judged without calling the API.
 - Public library API: `Config`, `Runner`, `FeedReader`, `RelevanceFilter`.
 
-[Unreleased]: https://github.com/fabianhogger/myfeed/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/fabianhogger/myfeed/releases/tag/v0.1.0
+[Unreleased]: https://github.com/fabianhogger/myrssfeed/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/fabianhogger/myrssfeed/releases/tag/v0.1.0

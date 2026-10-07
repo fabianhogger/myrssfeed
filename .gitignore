@@ -27,7 +27,7 @@ coverage.xml
 .vscode/
 *.swp
 
-# myfeed runtime artefacts - never commit a state file or your real config
+# myrssfeed runtime artefacts - never commit a state file or your real config
 state.json
 *.state.json
-myfeed.local.toml
+myrssfeed.local.toml

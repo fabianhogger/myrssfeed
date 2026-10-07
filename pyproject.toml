@@ -3,7 +3,7 @@ requires = ["hatchling>=1.24"]
 build-backend = "hatchling.build"
 
 [project]
-name = "myfeed"
+name = "myrssfeed"
 dynamic = ["version"]
 description = "Read RSS feeds and keep only the news that matches your criteria, judged by Claude."
 readme = "README.md"
@@ -48,22 +48,22 @@ dev = [
 ]
 
 [project.scripts]
-myfeed = "myfeed.cli:main"
+myrssfeed = "myrssfeed.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/fabianhogger/myfeed"
-Issues = "https://github.com/fabianhogger/myfeed/issues"
-Source = "https://github.com/fabianhogger/myfeed"
-Changelog = "https://github.com/fabianhogger/myfeed/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/fabianhogger/myrssfeed"
+Issues = "https://github.com/fabianhogger/myrssfeed/issues"
+Source = "https://github.com/fabianhogger/myrssfeed"
+Changelog = "https://github.com/fabianhogger/myrssfeed/blob/main/CHANGELOG.md"
 
 [tool.hatch.version]
-path = "src/myfeed/__init__.py"
+path = "src/myrssfeed/__init__.py"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/myfeed"]
+packages = ["src/myrssfeed"]
 
 [tool.hatch.build.targets.sdist]
-include = ["src/myfeed", "tests", "README.md", "LICENSE", "CHANGELOG.md", "examples"]
+include = ["src/myrssfeed", "tests", "README.md", "LICENSE", "CHANGELOG.md", "examples"]
 
 [tool.pytest.ini_options]
 minversion = "7.0"
@@ -103,7 +103,7 @@ ignore = [
 
 [tool.mypy]
 python_version = "3.9"
-files = ["src/myfeed"]
+files = ["src/myrssfeed"]
 strict = false
 warn_unused_ignores = true
 warn_redundant_casts = true
@@ -116,7 +116,7 @@ module = ["feedparser.*", "tomli.*"]
 ignore_missing_imports = true
 
 [tool.coverage.run]
-source = ["myfeed"]
+source = ["myrssfeed"]
 branch = true
 
 [tool.coverage.report]

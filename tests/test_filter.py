@@ -7,8 +7,8 @@ import json
 import pytest
 
 from conftest import FakeClient, FakeResponse
-from myfeed.errors import ClassificationError
-from myfeed.filter import RelevanceFilter
+from myrssfeed.errors import ClassificationError
+from myrssfeed.filter import RelevanceFilter
 
 
 def decisions(*pairs) -> str:

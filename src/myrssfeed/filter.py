@@ -154,8 +154,8 @@ class RelevanceFilter:
                 import anthropic
             except ModuleNotFoundError as exc:  # pragma: no cover - install issue
                 raise ClassificationError(
-                    "the 'anthropic' package is required; install myfeed's "
-                    "dependencies with `pip install myfeed`"
+                    "the 'anthropic' package is required; install myrssfeed's "
+                    "dependencies with `pip install myrssfeed`"
                 ) from exc
             # api_key=None is the documented way to let the SDK resolve
             # credentials from the environment.

@@ -11,8 +11,8 @@ from typing import Dict, List, Sequence
 
 import pytest
 
-from myfeed.filter import FilterResult
-from myfeed.models import FeedItem, Match, Verdict
+from myrssfeed.filter import FilterResult
+from myrssfeed.models import FeedItem, Match, Verdict
 
 
 @pytest.fixture

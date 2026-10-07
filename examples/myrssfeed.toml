@@ -1,8 +1,8 @@
-# Example myfeed configuration.
+# Example myrssfeed configuration.
 #
-#   myfeed --config examples/myfeed.toml --dry-run
+#   myrssfeed --config examples/myrssfeed.toml --dry-run
 #
-# Every key here can also be set as MYFEED_<KEY> in the environment or as a
+# Every key here can also be set as MYRSSFEED_<KEY> in the environment or as a
 # command-line flag; flags win over the environment, which wins over this file.
 
 # The filter itself. Be specific about what to skip as well as what to keep:
@@ -26,7 +26,7 @@ feeds = [
 ]
 
 # Remember what has already been reported, so each run only shows new items.
-state_path = "~/.local/state/myfeed/state.json"
+state_path = "~/.local/state/myrssfeed/state.json"
 state_ttl_days = 30
 
 # Keep running, one pass every 30 minutes. Remove this (or pass --once) to run

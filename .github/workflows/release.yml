@@ -9,7 +9,7 @@ name: Release
 #
 # One-time setup, per index: add a pending publisher at
 # https://pypi.org/manage/account/publishing/ (and the same on test.pypi.org)
-# with project `myfeed`, owner `fabianhogger`, repository `myfeed`,
+# with project `myrssfeed`, owner `fabianhogger`, repository `myrssfeed`,
 # workflow `release.yml`, and environment `pypi` (`testpypi` on TestPyPI).
 
 on:
@@ -46,7 +46,7 @@ jobs:
           tag="${GITHUB_REF_NAME#v}"
           version=$(python -c "import re, pathlib; \
             print(re.search(r'__version__ = \"([^\"]+)\"', \
-            pathlib.Path('src/myfeed/__init__.py').read_text()).group(1))")
+            pathlib.Path('src/myrssfeed/__init__.py').read_text()).group(1))")
           if [ "$tag" != "$version" ]; then
             echo "::error::tag $tag does not match __version__ $version"
             exit 1

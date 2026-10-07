@@ -1,7 +1,7 @@
 """Fetching and normalising RSS/Atom feeds.
 
 ``feedparser`` does the parsing; this module's job is to turn its loosely typed
-output into :class:`~myfeed.models.FeedItem` objects, to apply conditional GETs,
+output into :class:`~myrssfeed.models.FeedItem` objects, to apply conditional GETs,
 and to make sure one broken feed cannot abort a whole run.
 """
 
@@ -28,7 +28,7 @@ class FeedReader:
 
     Args:
         state: Record of seen items and HTTP validators. Pass an empty
-            :class:`~myfeed.state.State` to reconsider everything.
+            :class:`~myrssfeed.state.State` to reconsider everything.
         max_items_per_feed: Keep at most this many of the newest entries per
             feed; ``0`` keeps all of them.
         user_agent: ``User-Agent`` header sent with each request.
@@ -39,7 +39,7 @@ class FeedReader:
         state: Optional[State] = None,
         *,
         max_items_per_feed: int = 50,
-        user_agent: str = "myfeed",
+        user_agent: str = "myrssfeed",
     ) -> None:
         self._state = state if state is not None else State()
         self._max_items = max_items_per_feed
