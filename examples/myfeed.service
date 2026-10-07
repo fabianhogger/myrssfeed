@@ -11,7 +11,7 @@
 
 [Unit]
 Description=Filter RSS feeds with myfeed
-Documentation=https://github.com/your-org/myfeed
+Documentation=https://github.com/fabianhogger/myfeed
 After=network-online.target
 
 [Service]

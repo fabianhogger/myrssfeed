@@ -9,7 +9,7 @@ description = "Read RSS feeds and keep only the news that matches your criteria,
 readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.9"
-authors = [{ name = "the myfeed authors" }]
+authors = [{ name = "fabianhogger" }]
 keywords = ["rss", "atom", "feeds", "news", "claude", "anthropic", "llm", "filter"]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -51,10 +51,10 @@ dev = [
 myfeed = "myfeed.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/your-org/myfeed"
-Issues = "https://github.com/your-org/myfeed/issues"
-Source = "https://github.com/your-org/myfeed"
-Changelog = "https://github.com/your-org/myfeed/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/fabianhogger/myfeed"
+Issues = "https://github.com/fabianhogger/myfeed/issues"
+Source = "https://github.com/fabianhogger/myfeed"
+Changelog = "https://github.com/fabianhogger/myfeed/blob/main/CHANGELOG.md"
 
 [tool.hatch.version]
 path = "src/myfeed/__init__.py"

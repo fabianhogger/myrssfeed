@@ -1,9 +1,16 @@
 name: Release
 
-# Publishes to PyPI when a v* tag is pushed. Uses trusted publishing (OIDC), so
-# no API token needs to be stored in the repository; configure a pending
-# publisher on PyPI for this repo, this workflow file, and the `pypi`
-# environment before the first release.
+# Two paths, both using PyPI trusted publishing (OIDC), so no API token is ever
+# stored in this repository:
+#
+#   * Run this workflow manually ("Run workflow" / `gh workflow run release.yml`)
+#     to publish to TestPyPI. Use this to rehearse a release.
+#   * Push a `v*` tag to publish to the real PyPI.
+#
+# One-time setup, per index: add a pending publisher at
+# https://pypi.org/manage/account/publishing/ (and the same on test.pypi.org)
+# with project `myfeed`, owner `fabianhogger`, repository `myfeed`,
+# workflow `release.yml`, and environment `pypi` (`testpypi` on TestPyPI).
 
 on:
   push:
@@ -31,26 +38,47 @@ jobs:
         run: twine check --strict dist/*
 
       - name: Verify the tag matches the package version
-        # A mismatch here means the version bump was forgotten, and PyPI would
-        # reject or mislabel the upload.
+        # A mismatch means the version bump was forgotten, which would publish a
+        # release under the wrong number. PyPI never lets a number be reused, so
+        # this has to fail before the upload, not after.
+        if: github.event_name == 'push'
         run: |
           tag="${GITHUB_REF_NAME#v}"
-          version=$(python -c "import re,pathlib; \
+          version=$(python -c "import re, pathlib; \
             print(re.search(r'__version__ = \"([^\"]+)\"', \
             pathlib.Path('src/myfeed/__init__.py').read_text()).group(1))")
           if [ "$tag" != "$version" ]; then
-            echo "tag $tag does not match __version__ $version" >&2
+            echo "::error::tag $tag does not match __version__ $version"
             exit 1
           fi
-        if: github.event_name == 'push'
 
       - uses: actions/upload-artifact@v4
         with:
           name: distributions
           path: dist/
 
-  publish:
+  testpypi:
+    name: publish to TestPyPI
+    # Manual runs only: a tag release must not be rehearsed, it must ship.
+    if: github.event_name == 'workflow_dispatch'
+    needs: build
+    runs-on: ubuntu-latest
+    environment: testpypi
+    permissions:
+      id-token: write # required for trusted publishing
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: distributions
+          path: dist/
+
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+
+  pypi:
     name: publish to PyPI
+    if: github.event_name == 'push'
     needs: build
     runs-on: ubuntu-latest
     environment: pypi

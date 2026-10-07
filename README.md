@@ -33,7 +33,7 @@ security commentary."*
 myfeed is not on PyPI yet, so install it from a checkout:
 
 ```bash
-git clone https://github.com/your-org/myfeed
+git clone https://github.com/fabianhogger/myfeed
 cd myfeed
 pip install .
 ```
@@ -260,25 +260,40 @@ without an API key.
 
 ## Releasing
 
-Publishing is automated: pushing a `v*` tag builds the distributions and uploads
-them to PyPI via [trusted publishing](https://docs.pypi.org/trusted-publishers/),
-so no API token is stored in the repository.
+Publishing uses [trusted publishing](https://docs.pypi.org/trusted-publishers/),
+so no API token is stored in this repository. One-time setup, done once per index
+at <https://pypi.org/manage/account/publishing/> and the same page on
+<https://test.pypi.org>:
 
-One-time setup on PyPI: create a pending publisher for the project name, pointing
-at this repository, workflow `release.yml`, environment `pypi`.
+| Field       | Value          |
+| ----------- | -------------- |
+| Project     | `myfeed`       |
+| Owner       | `fabianhogger` |
+| Repository  | `myfeed`       |
+| Workflow    | `release.yml`  |
+| Environment | `pypi` on PyPI, `testpypi` on TestPyPI |
 
 Then, per release:
 
 ```bash
-# 1. bump __version__ in src/myfeed/__init__.py and move the CHANGELOG entry
-#    out of [Unreleased] into a new version heading
-# 2. commit, tag and push
+# 1. Rehearse on TestPyPI, and check the result installs
+gh workflow run release.yml
+pip install --index-url https://test.pypi.org/simple/ \
+            --extra-index-url https://pypi.org/simple/ myfeed
+
+# 2. Bump __version__ in src/myfeed/__init__.py, move the CHANGELOG entry out
+#    of [Unreleased] into a version heading, then tag and push
 git commit -am "Release 0.1.0"
 git tag -a v0.1.0 -m "0.1.0"
 git push origin main v0.1.0
 ```
 
-To check the build locally first:
+The tag push is what publishes to the real PyPI. The workflow refuses to upload
+if the tag does not match `__version__`, because PyPI never allows a version
+number to be reused — a mistake means yanking the release and shipping a new
+number, so it is checked before the upload rather than after.
+
+To inspect a build locally first:
 
 ```bash
 pip install build twine

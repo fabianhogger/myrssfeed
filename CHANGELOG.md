@@ -25,5 +25,5 @@ Initial release.
 - `--dry-run` to inspect what would be judged without calling the API.
 - Public library API: `Config`, `Runner`, `FeedReader`, `RelevanceFilter`.
 
-[Unreleased]: https://github.com/your-org/myfeed/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/your-org/myfeed/releases/tag/v0.1.0
+[Unreleased]: https://github.com/fabianhogger/myfeed/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/fabianhogger/myfeed/releases/tag/v0.1.0
